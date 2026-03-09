@@ -121,18 +121,33 @@ curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
 
 *Change the Object inside the `query` above if you find other leaked tables (like `Opportunity` or custom objects ending in `__c`). This will return a JSON blob containing the first 10 records and their specific fields.*
 
+### Step 4: Visual UI Checks (Record Lists and Home URLs)
+Beyond data extraction, Aura Inspector inherently searches for two vulnerabilities linked directly to exposed web UI interfaces.
+
+Check your `results_guest/misc/` folder to see if these files exist:
+1. **`record_ui_list.json`** - Lists accessible "Record Lists" (Visual matrix UI tables developers build out). If URLs are populated here, copy-paste them straight into your browser to visually see exposed data tables natively without querying.
+2. **`object_home_urls.json`** - Lists unprotected "Home URLs". External plugins often generate Admin or overview dashboards at URLs like `/s/spark-admin`. If these populate and load for a Guest user, it indicates huge configuration flaws in external integrations.
+
 ---
 
-### Step 4: Advanced Scans for Indepth Analysis
+### Step 5: Advanced Scans & Authenticated Testing
 Sometimes standard generic scans miss custom applications built onto the instance. 
 
-If you notice your site uses custom URL paths (e.g. `https://your-site.com/myCustomApp/s`), you should force the tool to explicitly target those paths instead of the default `/s`.
+**Custom Sub-Directories and App Routing (`--app`)**
+If you notice your site uses custom URL paths (e.g., `https://partners.your-custom-domain.com/myCustomApp/s`), the standard tooling default of `/s` will fail to extract everything. You should force the tool to explicitly target those paths instead.
 
 ```powershell
-python src\aura_cli.py -u https://your-live-site.my.site.com --app /myCustomApp/s -o results_custom_app
+python src\aura_cli.py -u https://partners.your-custom-domain.com/myCustomApp/s --app /myCustomApp/s -o results_custom_app
 ```
 
-**If you ever acquire standard user authenticated credentials** for the community site, you can leverage it by feeding the SID cookie into the tool via `-c` to see if logged-in standard users are improperly granted access to internal Administrative databases.
+**Testing Custom Endpoints or Proxies (`--aura`)**
+If your custom site employs a Web Application Firewall (WAF) or masks its API endpoints, you might need to manually trace where network requests are routing in your browser and pass the direct API path:
+```powershell
+python src\aura_cli.py -u https://partners.your-custom-domain.com/myCustomApp/s --app /myCustomApp/s --aura /myCustomApp/s/sfsites/aura -o results_custom_app
+```
+
+**Testing as a Standard Authenticated User:**
+If you acquire standard user login credentials for the community portal, you should absolutely re-run this tool from an authenticated viewpoint to test for internal privilege escalation. Obtain your `SID` cookie using your browser's dev tools or Burp Suite.
 
 ```powershell
 python src\aura_cli.py -u https://your-live-site.my.site.com -c "sid=00Dxx...; " -o results_authenticated

